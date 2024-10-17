@@ -4,6 +4,13 @@ if (!require(bnlearn)) {
   library(bnlearn)
 }
 
+if (!require(bnstruct)) {
+  install.packages("bnstruct")
+  library(bnstruct)
+}
+
+data_csv <- read.csv("C:/Users/svenm/Documents/Radboud/Bayesian Networks/BNCI/data/diabetes_binary_health_indicators_BRFSS2015.csv")
+
 # Define the nodes in the network
 nodes <- c("Age", "Diabetes_binary", "HighBP", "HighChol", "AnyHealthcare", 
            "GenHlth", "MentHlth", "NoDocbcCost", "PhysHlth", "BMI", 
@@ -70,3 +77,20 @@ plot(dag)
 
 # Optionally, check the structure of the Bayesian Network
 print(dag)
+
+
+fitted_model <- bn.fit(dag, data, method = "mle-g")
+print(fitted_model$Diabetes_binary)
+
+print(dim(data_csv))
+n <- ncol(data_csv)
+discreteness <- rep("c", n)
+discreteness <- c("d", "d", "d", "d", "c", "d", "d", "d", "d", "d", "d", "d", "d", "d", "d", "d", "d", "d", "d", "c", "c", "c")
+print(discreteness)
+print(length(discreteness))
+
+print(data_csv)
+
+data <- BNDataset(data = data_csv, discreteness = discreteness)
+
+
