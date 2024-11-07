@@ -10,6 +10,7 @@ if (!require(bnstruct)) {
 }
 
 data_csv <- read.csv("C:/Users/svenm/Documents/Radboud/Bayesian Networks/BNCI/data/diabetes_binary_health_indicators_BRFSS2015.csv")
+st_data_csv <- scale(data_csv)
 
 # Define the nodes in the network
 nodes <- c("Age", "Diabetes_binary", "HighBP", "HighChol", "AnyHealthcare", 
@@ -78,20 +79,41 @@ plot(dag)
 # Optionally, check the structure of the Bayesian Network
 print(dag)
 
-lm()
+# Load lavaan package
+install.packages("lavaan")
+library(lavaan)
 
-fitted_model <- bn.fit(dag, data, method = "mle-g")
-print(fitted_model$Diabetes_binary)
+# Define the SEM model string based on your DAG structure
+sem_model <- '
+  # Direct effects specified by arcs in your DAG
+  Diabetes_binary ~ Age + BMI + GenHlth + HeartDiseaseorAttack + HighBP + HighChol + PhysActivity + Smoker + Stroke
+  HighBP ~ Age + BMI + Sex + Smoker
+  HighChol ~ Age + BMI + CholCheck + Sex + Smoker
+  GenHlth ~ AnyHealthcare + MentHlth + PhysHlth
+  MentHlth ~ AnyHealthcare
+  NoDocbcCost ~ AnyHealthcare + Income
+  PhysHlth ~ AnyHealthcare + DiffWalk + NoDocbcCost
+  BMI ~ Education + Fruits + Income + PhysActivity + Sex + Veggies
+  PhysActivity ~ Education + GenHlth + Income
+  HeartDiseaseorAttack ~ HighBP + HighChol + Sex + Smoker + Stroke + HvyAlcoholConsump
+  Stroke ~ HighBP + HighChol + HvyAlcoholConsump + Smoker
+  AnyHealthcare ~ Income
+  CholCheck ~ HighChol
+'
 
-print(dim(data_csv))
-n <- ncol(data_csv)
-discreteness <- rep("c", n)
-discreteness <- c("d", "d", "d", "d", "c", "d", "d", "d", "d", "d", "d", "d", "d", "d", "d", "d", "d", "d", "d", "c", "c", "c")
-print(discreteness)
-print(length(discreteness))
+# Fit the SEM model
+fit <- sem(sem_model, data = st_data_csv)
+varTable(fit)
 
-print(data_csv)
+# Display the summary of the model fit
+summary(fit, fit.measures = TRUE, standardized = TRUE)
 
-data <- BNDataset(data = data_csv, discreteness = discreteness)
+install.packages("dagitty")
+library(dagitty)
 
+g <- lavaanToGraph( fit, digits=4 )
+print(g)
 
+imp <- impliedCovarianceMatrix( g )
+
+imp['Diabetes_binary', 'Education']
