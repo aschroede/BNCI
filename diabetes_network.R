@@ -78,6 +78,7 @@ plot(dag)
 # Optionally, check the structure of the Bayesian Network
 print(dag)
 
+lm()
 
 fitted_model <- bn.fit(dag, data, method = "mle-g")
 print(fitted_model$Diabetes_binary)
