@@ -1,0 +1,71 @@
+{
+    "ID": [],
+    "Diabetes_binary": [],
+    "HighBP": [
+        "Diabetes_binary",
+        "HeartDiseaseorAttack"
+    ],
+    "HighChol": [
+        "Diabetes_binary",
+        "HeartDiseaseorAttack"
+    ],
+    "CholCheck": [
+        "HighChol"
+    ],
+    "BMI": [
+        "Diabetes_binary",
+        "HighBP",
+        "HighChol"
+    ],
+    "Smoker": [
+        "HeartDiseaseorAttack",
+        "Diabetes_binary"
+    ],
+    "Stroke": [
+        "HeartDiseaseorAttack",
+        "Diabetes_binary"
+    ],
+    "HeartDiseaseorAttack": [
+        "Diabetes_binary"
+    ],
+    "PhysActivity": [
+        "BMI",
+        "Diabetes_binary"
+    ],
+    "Fruits": [
+        "BMI"
+    ],
+    "Veggies": [
+        "BMI"
+    ],
+    "HvyAlcoholConsump": [
+        "HeartDiseaseorAttack"
+    ],
+    "GenHlth": [
+        "PhysActivity",
+        "Diabetes_binary"
+    ],
+    "MentHlth": [
+        "GenHlth"
+    ],
+    "PhysHlth": [
+        "GenHlth"
+    ],
+    "DiffWalk": [
+        "PhysHlth"
+    ],
+    "Sex": [],
+    "Age": [
+        "Diabetes_binary",
+        "HighBP",
+        "HighChol"
+    ],
+    "Education": [
+        "BMI",
+        "PhysActivity"
+    ],
+    "Income": [
+        "BMI",
+        "PhysActivity"
+    ]
+}
