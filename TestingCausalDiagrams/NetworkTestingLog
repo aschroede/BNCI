@@ -1,15 +1,77 @@
 ------ TEST 1 -------
 
+Got these warnings:
+
+Warning messages:
+1: lavaan->lav_data_full():  
+   some ordered categorical variable(s) have more than 12 levels: "Age" 
+2: lavaan->lav_data_full():  
+   some observed variances are (at least) a factor 1000 times larger than others; use varTable(fit) to investigate 
+3: lavaan->lav_samplestats_step2():  
+   correlation between variables Education and BMI is (nearly) 1.0 
+
+Addressed last two by scaling numeric data with following code:
+# Scale Numeric Variables to std=1
+d$BMI <- scale(d$BMI)
+d$MentHlth <- scale(d$MentHlth)
+d$PhysHlth <- scale(d$PhysHlth)
+
+Addressed first problem by treating age as numeric data to avoid 13 categories
+d$Age <- as.numeric(d$Age)
+
+
+
 Initial Testing with 1 conditioning variable
+
 Two biggest problems
 1. DiffW _||_ Incm
 2. MntH _||_ PhyH | AnyH
 
 Fix by drawing arrows
-1. from Income to DiffW
-2. from PhyH to MntH
+1. Income -> DiffW (Low money prevents people from getting health care for leg problems?)
+2. PhyH <-> MntH (bidirectional)
+
 
 ------ TEST 2 -------
+
+1 Conditioning Variable
+Largest Problems
+1. DffW _||_ PhyA | Incm
+2. Age _||_ Dffw
+3. DiffW _||_ MntH |AnyH
+4. Frts _||_ Vggs | Edct
+ 
+
+Fix by drawing arrows
+1. PhyA <-> DiffW (not sure about this, seems like it could be a bi-directional arrow, implicit latent variable?)
+2. Age -> DiffW
+3. DiffW -> MntH
+3. Frts <-> Vggs (should be bi-directional, underlying latent variable)
+
+------ TEST 3 -------
+
+0 Conditioning Variables (Probably should have done this first)
+Largest problems
+1. Edct _||_ Smkr
+2. GnHI _||_ Smkr
+
+Both seem reasonable so to fix
+1. Edct -> Smkr
+2. Smkr -> GnHI
+
+------ TEST 4 -------
+
+Conditioning on 1
+largest problem
+1. Age _||_ Incm
+
+Add arrow
+1. Age -> Incm
+2. Age -> GenHlth
+
+------ TEST 5 -------
+Looks good
+
 
 
 
