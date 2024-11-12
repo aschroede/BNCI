@@ -1,0 +1,15 @@
+------ TEST 1 -------
+
+Initial Testing with 1 conditioning variable
+Two biggest problems
+1. DiffW _||_ Incm
+2. MntH _||_ PhyH | AnyH
+
+Fix by drawing arrows
+1. from Income to DiffW
+2. from PhyH to MntH
+
+------ TEST 2 -------
+
+
+
