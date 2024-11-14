@@ -1,3 +1,8 @@
+if (!require(Dict)){
+  install.packages("Dict")
+  library(Dict)
+}
+
 if (!require(pastecs)){
   install.packages("pastecs")
   library(pastecs)
@@ -19,6 +24,10 @@ if (!require(bayesianNetworks)){
 }
 
 
+save_to_txt <- function(object, filename){
+  writeLines(object, filename)
+  message("Created file: ", filename)
+}
 
 get_interventional_dags <- function(dag_filepath, d, output_folder="doDags"){
   
@@ -41,8 +50,33 @@ get_interventional_dags <- function(dag_filepath, d, output_folder="doDags"){
     
     message("Created file: ", output_file)
   }
+}
+
+
+get_causal_effects <- function(doDAG_path, target_var){
   
+  causal_effects <- list()
   
+  # Get all doDAGs
+  files <- list.files(path=doDAG_path, pattern="*.txt", full.names=FALSE, recursive=FALSE)
+  
+  for (filename in files){
+    
+    #doDAG_string <- readChar(filename, file.info(filename)$size)
+    
+    filepath = file.path(doDAG_path, filename)
+    doDAG_string <- readChar(filepath, file.info(filepath)$size)
+    doDAG <- dagitty(doDAG_string)
+    
+    variable <- sub("do_(.*)\\.txt", "\\1", filename)
+    
+    # extract variable name from file name
+    implied_cov_matrix = impliedCovarianceMatrix(doDAG, standardized = TRUE)
+    implied_cov = implied_cov_matrix[variable, target_var]
+    causal_effects[[variable]] <- implied_cov
+  }
+  
+  return (causal_effects)
 }
 
 
@@ -72,6 +106,8 @@ load_data <- function(){
   d$PhysHlth <- scale(d$PhysHlth)
   return(d)
 }
+
+
 
 run_independence_tests <- function(dag, data, max_conditioning_vars, top_n = Inf, folder){
   

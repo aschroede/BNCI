@@ -1,82 +1,89 @@
 dag {
-bb="-9.145,-7.211,8.532,7.668"
-Age [pos="-3.330,-3.637"]
-AnyHealthcare [pos="4.357,2.087"]
-BMI [pos="-1.539,2.944"]
-CholCheck [pos="-0.010,2.105"]
-Diabetes_binary [pos="-3.422,5.834"]
-DiffWalk [pos="4.106,3.718"]
-Education [pos="1.125,-6.001"]
-Fruits [pos="-2.025,-4.985"]
-GenHlth [pos="-2.271,6.471"]
-HeartDiseaseorAttack [pos="-5.421,5.869"]
-HighBP [pos="-5.097,-1.021"]
-HighChol [pos="-2.608,-1.339"]
-HvyAlcoholConsump [pos="-7.514,0.498"]
-Income [pos="2.962,-3.599"]
-MentHlth [pos="2.442,4.215"]
-NoDocbcCost [pos="5.886,0.427"]
-PhysActivity [pos="1.603,3.085"]
-PhysHlth [pos="2.044,6.467"]
-Sex [pos="-5.695,-4.862"]
-Smoker [pos="-6.469,-1.233"]
-Stroke [pos="-6.909,6.862"]
-Veggies [pos="-0.361,-4.959"]
-Age -> Diabetes_binary
-Age -> DiffWalk
-Age -> GenHlth
-Age -> HighBP
-Age -> HighChol
-Age -> Income
-AnyHealthcare -> CholCheck
-AnyHealthcare -> GenHlth
-AnyHealthcare -> MentHlth
-AnyHealthcare -> PhysActivity
-AnyHealthcare -> PhysHlth
-BMI -> Diabetes_binary [pos="-2.512,3.968"]
-BMI -> HighBP [pos="-4.052,-0.880"]
-BMI -> HighChol [pos="-1.086,-2.072"]
-DiffWalk -> MentHlth
-DiffWalk -> PhysHlth
-DiffWalk <-> PhysActivity
-Education -> BMI
-Education -> CholCheck
-Education -> Fruits
-Education -> Income
-Education -> PhysActivity [pos="1.174,0.410"]
-Education -> Smoker [pos="-3.594,-6.421"]
-Education -> Veggies
-Fruits -> BMI
-Fruits -> HighBP
-Fruits <-> Veggies
-GenHlth -> Diabetes_binary
-HeartDiseaseorAttack -> Stroke
-HighBP -> Diabetes_binary [pos="-4.656,0.436"]
-HighChol -> CholCheck
-HighChol -> Diabetes_binary
-HighChol -> Stroke
-HvyAlcoholConsump -> Stroke
-Income -> AnyHealthcare
-Income -> BMI [pos="1.657,-3.273"]
-Income -> DiffWalk
-Income -> NoDocbcCost
-Income -> PhysActivity
-MentHlth -> GenHlth
-MentHlth <-> PhysHlth [pos="2.316,5.082"]
-NoDocbcCost -> AnyHealthcare
-NoDocbcCost -> PhysHlth [pos="5.693,4.613"]
-PhysActivity -> BMI [pos="-0.663,3.200"]
-PhysActivity -> Diabetes_binary
-PhysActivity -> GenHlth
-PhysActivity -> PhysHlth [pos="1.804,4.687"]
-PhysHlth -> GenHlth
-Sex -> BMI
-Sex -> HighBP
-Sex -> HighChol
-Smoker -> Diabetes_binary
-Smoker -> GenHlth [pos="-2.647,2.976"]
-Smoker -> HighBP
-Smoker -> Stroke
-Veggies -> BMI
-Veggies -> HighBP
+Age
+AnyHealthcare
+BMI
+CholCheck
+Diabetes_binary
+DiffWalk
+Education
+Fruits
+GenHlth
+HeartDiseaseorAttack
+HighBP
+HighChol
+HvyAlcoholConsump
+Income
+MentHlth
+NoDocbcCost
+PhysActivity
+PhysHlth
+Sex
+Smoker
+Stroke
+Veggies
+Age -> Diabetes_binary [beta="0.087"]
+Age -> DiffWalk [beta="0.15"]
+Age -> GenHlth [beta="0.11"]
+Age -> HighBP [beta="0.35"]
+Age -> HighChol [beta="0.28"]
+Age -> Income [beta="-0.091"]
+Age <-> Education [beta="-0.11"]
+Age <-> HvyAlcoholConsump [beta="-0.035"]
+Age <-> Sex [beta="-0.027"]
+AnyHealthcare -> CholCheck [beta="0.11"]
+AnyHealthcare -> GenHlth [beta="-0.039"]
+AnyHealthcare -> MentHlth [beta="-0.054"]
+AnyHealthcare -> PhysActivity [beta="0.0039"]
+AnyHealthcare -> PhysHlth [beta="0.0044"]
+BMI -> Diabetes_binary [beta="0.13"]
+BMI -> HighBP [beta="0.22"]
+BMI -> HighChol [beta="0.12"]
+CholCheck <-> Stroke [beta="0.01"]
+DiffWalk -> MentHlth [beta="0.23"]
+DiffWalk -> PhysHlth [beta="0.45"]
+DiffWalk <-> PhysActivity [beta="-0.18"]
+Education -> BMI [beta="-0.073"]
+Education -> CholCheck [beta="-0.0052"]
+Education -> Fruits [beta="0.12"]
+Education -> Income [beta="0.5"]
+Education -> PhysActivity [beta="0.13"]
+Education -> Smoker [beta="-0.18"]
+Education -> Veggies [beta="0.16"]
+Education <-> HvyAlcoholConsump [beta="0.026"]
+Education <-> Sex [beta="0.025"]
+Fruits -> BMI [beta="-0.051"]
+Fruits -> HighBP [beta="-0.028"]
+Fruits <-> Veggies [beta="0.23"]
+GenHlth -> Diabetes_binary [beta="0.18"]
+HeartDiseaseorAttack -> Stroke [beta="0.19"]
+HighBP -> Diabetes_binary [beta="0.12"]
+HighChol -> CholCheck [beta="0.08"]
+HighChol -> Diabetes_binary [beta="0.086"]
+HighChol -> Stroke [beta="0.055"]
+HvyAlcoholConsump -> Stroke [beta="-0.014"]
+HvyAlcoholConsump <-> Sex [beta="0.0057"]
+Income -> AnyHealthcare [beta="0.11"]
+Income -> BMI [beta="-0.067"]
+Income -> DiffWalk [beta="-0.29"]
+Income -> NoDocbcCost [beta="-0.2"]
+Income -> PhysActivity [beta="0.14"]
+MentHlth -> GenHlth [beta="0.14"]
+MentHlth <-> PhysHlth [beta="0.23"]
+NoDocbcCost -> AnyHealthcare [beta="-0.21"]
+NoDocbcCost -> PhysHlth [beta="0.055"]
+PhysActivity -> BMI [beta="-0.11"]
+PhysActivity -> Diabetes_binary [beta="-0.02"]
+PhysActivity -> GenHlth [beta="-0.14"]
+PhysActivity -> PhysHlth [beta="-0.087"]
+PhysHlth -> GenHlth [beta="0.42"]
+Sex -> BMI [beta="0.052"]
+Sex -> HighBP [beta="0.043"]
+Sex -> HighChol [beta="0.034"]
+Smoker -> Diabetes_binary [beta="-0.004"]
+Smoker -> GenHlth [beta="0.081"]
+Smoker -> HighBP [beta="0.044"]
+Smoker -> Stroke [beta="0.036"]
+Veggies -> BMI [beta="-0.0066"]
+Veggies -> HighBP [beta="-0.033"]
 }
+
