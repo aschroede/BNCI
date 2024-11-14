@@ -72,6 +72,11 @@ Add arrow
 ------ TEST 5 -------
 Looks good
 
+Some additional things to do if time permits
+1. Test for surplus arrows
+2. Test for arrows in the wrong direction
+3. Introduce better latent variables (instead of bi-directional arrows)
+
 
 
 

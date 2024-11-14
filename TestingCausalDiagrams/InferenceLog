@@ -1,0 +1,5 @@
+When I plot my graph without fits I get 63 edges but when fit and plot with coefficients
+I get 70 edges, 7 additional edges were added? What gives? Maybe its something like 
+needing to specify read ~~ 0*write between parents?
+
+I get difference implied covariance between education and diabetes each time I run inference.R??? What??
