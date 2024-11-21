@@ -18,10 +18,10 @@ if (!require(lavaan)){
   library(lavaan)
 }
 
-if (!require(bayesianNetworks)){
-  install.packages("bayesianNetworks")
-  library(bayesianNetworks)
-}
+#if (!require(bayesianNetworks)){
+#  install.packages("bayesianNetworks")
+#  library(bayesianNetworks)
+#}
 
 
 save_to_txt <- function(object, filename){
@@ -77,6 +77,7 @@ get_causal_effects <- function(doDAG_path, target_var){
   }
   
   return (causal_effects)
+  
 }
 
 
@@ -171,8 +172,6 @@ Age -> Income
 AnyHealthcare -> CholCheck
 AnyHealthcare -> GenHlth
 AnyHealthcare -> MentHlth
-AnyHealthcare -> PhysActivity
-AnyHealthcare -> PhysHlth
 BMI -> Diabetes_binary [pos="-2.512,3.968"]
 BMI -> HighBP [pos="-4.052,-0.880"]
 BMI -> HighChol [pos="-1.086,-2.072"]
@@ -181,7 +180,6 @@ DiffWalk -> MentHlth
 DiffWalk -> PhysHlth
 DiffWalk <-> PhysActivity
 Education -> BMI
-Education -> CholCheck
 Education -> Fruits
 Education -> Income
 Education -> PhysActivity [pos="1.174,0.410"]
@@ -218,12 +216,10 @@ Sex -> BMI
 Sex -> HeartDiseaseorAttack
 Sex -> HighBP
 Sex -> HighChol
-Smoker -> Diabetes_binary
 Smoker -> GenHlth [pos="-2.647,2.976"]
 Smoker -> HeartDiseaseorAttack
 Smoker -> HighBP
 Smoker -> Stroke
-Veggies -> BMI
 Veggies -> HighBP
 }')
   return(g)
