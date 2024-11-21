@@ -1,3 +1,8 @@
+if (!require(lavaanExtra)){
+  install.packages("lavaanExtra")
+  library(lavaanExtra)
+}
+
 if (!require(Dict)){
   install.packages("Dict")
   library(Dict)
@@ -18,17 +23,20 @@ if (!require(lavaan)){
   library(lavaan)
 }
 
-#if (!require(bayesianNetworks)){
-#  install.packages("bayesianNetworks")
-#  library(bayesianNetworks)
-#}
+if (!require(bayesianNetworks)){
+  install.packages("bayesianNetworks")
+  library(bayesianNetworks)
+}
 
 
+# Function for saving to txt
 save_to_txt <- function(object, filename){
   writeLines(object, filename)
   message("Created file: ", filename)
 }
 
+# Iterates through each variable in the dag, cuts incoming edges to the variable
+# and saves the result. Effectively applies do operator for each variable in network
 get_interventional_dags <- function(dag_filepath, d, output_folder="doDags"){
   
   # Save results
@@ -52,6 +60,8 @@ get_interventional_dags <- function(dag_filepath, d, output_folder="doDags"){
   }
 }
 
+# Accepts a folder of dags and for each dag finds the causal effect of all
+# all variables on the target variable. 
 
 get_causal_effects <- function(doDAG_path, target_var){
   
@@ -81,7 +91,7 @@ get_causal_effects <- function(doDAG_path, target_var){
 }
 
 
-
+# Load and preprocess dataset
 load_data <- function(){
   # Load data
   d <- read.csv("../data/diabetes_binary_health_indicators_BRFSS2015.csv")
@@ -92,24 +102,22 @@ load_data <- function(){
   d$Education <- factor(d$Education, levels = 1:6, ordered = TRUE)
   d$Income <- factor(d$Income, levels = 1:8, ordered = TRUE)
   
-  
   # Fix lavaan warning: some ordered categorical variable(s) have more than 12 levels: "Age". 
   # Fix by treating age as a continuous variable (assuming ranges are equally spaced)
   d$Age <- as.numeric(d$Age)
-  
-  # This scales and centers numeric data to have mean 0 and variance 1
-  #d <- scale(d)
   
   #Scale Numeric Variables to std=1
   d$Age <- scale(d$Age)
   d$BMI <- scale(d$BMI)
   d$MentHlth <- scale(d$MentHlth)
   d$PhysHlth <- scale(d$PhysHlth)
+  
   return(d)
 }
 
 
-
+# Runs conditional independence tests on a dag and saves the result. 
+# Useful for testing for independence statements that don't hold.
 run_independence_tests <- function(dag, data, max_conditioning_vars, top_n = Inf, folder){
   
   # Generate the polychoric correlation matrix
@@ -129,6 +137,17 @@ run_independence_tests <- function(dag, data, max_conditioning_vars, top_n = Inf
   dev.off()
 }
 
+# Gets all path coefficients below a certain threshold
+# Useful for pruning superfluous edges
+get_superfluous_edges <- function(fitted_model, threshold = 0.01, file){
+  
+  path_coefficients <- lavaan_reg(fitted_model)
+  paths_below_threshold <- subset(path_coefficients,abs(b)<0.01)
+  write.csv(paths_below_threshold, file)
+  return  (paths_below_threshold)
+}
+
+# Test that DAG is actually acyclic
 test_for_cycles <- function(g){
   # Check that we have an actual DAG
   if (!isAcyclic(g)) {

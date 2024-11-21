@@ -1,85 +1,48 @@
-install.packages("lavaanExtra")
-library(lavaanExtra)
-
+# Bring in the utilities file to access all functions
 source("utilities.R")
+
+# Load dataset with preprocessing
 d <- load_data()
-
-
-# Summary stats
-# stat.desc(d)
-# summary(d)
-# head(d)
-# str(d)
-# mean(d$Age)
-# mean(d$Sex)
-# var(d$Age)
-# var(d$Sex)
-
-
-
+# get the dag from utilities
 g <- get_dag()
+# test for cycles
 test_for_cycles(g)
 
 
-
-plot(g)
-# Extract polychoric correlation matrix
+# Extract polychoric correlation matrix using lavaan
 M <- lavCor(d)
-print(toString(g, "lavaan"))
 
-# One way to get path coefficients
-fit1 <- sem(toString(g, "lavaan"), sample.cov=M, sample.nobs=nrow(d))
+# Use the data, polychoric correlation matrix, and the dag to fit our model
+fit <- sem(toString(g, "lavaan"), sample.cov=M, sample.nobs=nrow(d))
 
-# Check for low path coefficients to remove superfluous edges
-coeffs <- lavaan_reg(fit1)
-rems <- subset(coeffs,abs(b)<0.01)
+# Test for too many edges with fitted path coeficients
+# Only use during testing of network structure!
+#get_superfluous_edges(fit, 0.01, "superfluous_edges.csv")
 
-#install.packages("openxlsx")
-#library(openxlsx)
-#write.xlsx(rems, 'rems.xlsx')
+# Convert the fitted sem model in lavaan to a daggity dag
+fg <- lavaanToGraph(fit, digits=2)
 
-# Second way to get path coefficients
-# Results in warnings
-#Warning messages:
-  # 1: lavaan->lav_data_full():  
-  # exogenous variable(s) declared as ordered in data: "Education" 
-# 2: lavaan->lav_lavaan_step11_estoptim():  
-  # Model estimation FAILED! Returning starting values. 
-#fit2 <- sem(toString(g, "lavaan"), d)
-
-
-# Fit and 
-summary(fit1)
-#summary(fit2)
-cg <- coordinates(g)
-fg <- lavaanToGraph(fit1, digits=2)
-# Save fitted dag with beta coefficients
+# Save fitted dag with path coefficients
 save_to_txt(fg, "FittedDAG.txt")
 
-# Plot with path coefficients
-print(fg)
+# Extract coordinates from daggity dag
+cg <- coordinates(g)
+# Apply coordinates to fitted daggity dag
 coordinates(fg) <-cg
+# Draw resutling daggity dag wtih coefficients
 plot(fg, show.coefficients=TRUE)
 
 # Number of edges don't match up
 edges(g)
 edges(fg)
 
-# Causl Effect analysis with do operator
-#debug(get_interventional_dags)
+# Generate all the modified dags the result from the do operator
 get_interventional_dags("FittedDAG.txt", d)
 
-
-
-# Is the impliedCovarianceMatrix the same as the polychoric correlation matrix?
-# Shouldn't be... they are not the same when printed.
-# Polychoric correlation matrix used to get path coefficients, which rae used to get implied covariance
-# The impliedCovarianceMatrix has the causal effects in the observation regime 
-
-# Here we assume that all residual variances are set to values that generate a variance of 1 for all observed variables (need to scale all data??)
-debug(get_causal_effects)
+# Using the generated graphs, apply do operator with target variable
 causal_effects = get_causal_effects("doDags", "Diabetes_binary")
-write.csv(causal_effects)
+# Write results to file
+write.csv(causal_effects, "causal_effects.csv")
 
 
 
