@@ -1,3 +1,9 @@
+if (!require(ggplot2)){
+  install.packages("ggplot2")
+  library(ggplot2)
+}
+
+
 if (!require(lavaanExtra)){
   install.packages("lavaanExtra")
   library(lavaanExtra)
@@ -95,6 +101,7 @@ get_causal_effects <- function(doDAG_path, target_var){
 load_data <- function(){
   # Load data
   d <- read.csv("../data/diabetes_binary_health_indicators_BRFSS2015.csv")
+
   
   # Ordinal Variables
   d$GenHlth <- factor(d$GenHlth, levels = 1:5, ordered = TRUE)
@@ -243,3 +250,65 @@ Veggies -> HighBP
 }')
   return(g)
 }
+
+
+visualise_data <- function(){
+  
+  d <- read.csv("../data/diabetes_binary_health_indicators_BRFSS2015.csv")
+  
+  
+  update_geom_defaults("bar", list(fill = "skyblue", color = NA))
+  
+  my_theme <- theme_minimal() +
+    theme(
+      plot.title = element_text(hjust = 0.5, size = 16, face = "bold"),
+      axis.title = element_text(size = 14),
+      axis.text = element_text(size = 12),
+      legend.position = "bottom"
+    )
+  
+  # Apply the custom theme globally
+  theme_set(my_theme)
+  
+  # hist(data$MentHlth,
+  #      main = "Histogram of Mental health",
+  #      xlab = "Number of past 30 days with bad mental health",
+  #      ylab = "Frequency",
+  #      col = "lightblue",
+  #      border = "black",
+  #      breaks = 10, 
+  # )
+  
+  #ggplot(d, aes(x = Diabetes_binary))
+  
+  
+  # Binary processing for better labels
+  d$Diabetes_binary <- factor(d$Diabetes_binary, levels = c(0,1), ordered = TRUE, labels = c("No Diabetes", "Diabetes"))
+  p <- ggplot(d, aes(x = Diabetes_binary)) +
+    geom_bar() +
+    labs(title = "Histogram of Diabetes", x = "Diabetes Status", y = "Frequency")
+  ggsave(filename = "images/Diabetes.png", plot = p, width = 8, height = 5, dpi = 300)
+  
+  # hist(data_csv$PhysHlth,
+  #      main = "Histogram of Physical health",
+  #      xlab = "Physical health",
+  #      ylab = "Frequency",
+  #      col = "lightblue",
+  #      border = "black",
+  #      breaks = 30, 
+  # )
+  
+  d$Age <- factor(d$Age, levels = 1:13, ordered = TRUE)
+  p <- ggplot(d, aes(x = Age)) +
+    geom_bar() +
+    labs(title = "Histogram of Age", x = "Age Categories", y = "Frequency")
+  ggsave(filename = "images/Age.png", plot = p, width = 8, height = 5, dpi = 300)
+  
+  
+  p <- ggplot(d, aes(x = BMI)) +
+    geom_bar() +
+    labs(title = "Histogram of BMI", x = "BMI", y = "Frequency")
+  ggsave(filename = "images/BMI.png", plot = p, width = 8, height = 5, dpi = 300)
+}
+
+  
