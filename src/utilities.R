@@ -29,10 +29,10 @@ if (!require(lavaan)){
   library(lavaan)
 }
 
-if (!require(bayesianNetworks)){
-  install.packages("bayesianNetworks")
-  library(bayesianNetworks)
-}
+#if (!require(bayesianNetworks)){
+#  install.packages("bayesianNetworks")
+#  library(bayesianNetworks)
+#}
 
 
 # Function for saving to txt
@@ -100,7 +100,8 @@ get_causal_effects <- function(doDAG_path, target_var){
 # Load and preprocess dataset
 load_data <- function(){
   # Load data
-  d <- read.csv("../data/diabetes_binary_health_indicators_BRFSS2015.csv")
+  #d <- read.csv("../data/diabetes_binary_health_indicators_BRFSS2015.csv")
+  d <- read.csv("C:/Users/svenm/Documents/Radboud/Bayesian Networks/BNCI/data/SUBSET_diabetes_binary_health_indicators_BRFSS2015.csv")
 
   
   # Ordinal Variables
