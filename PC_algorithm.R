@@ -16,12 +16,47 @@ if (!require(bnlearn)){
   install.packages("bnlearn")
 }
 library(bnlearn)
+library(igraph)
 
 
+load_data <- function(){
+  # Load data
+  d <- read.csv("/Users/daankersten/Desktop/Study/Bayesian/BNCI/data/diabetes_binary_health_indicators_BRFSS2015.csv")
+  
+  
+  # Ordinal Variables
+  d$GenHlth <- factor(d$GenHlth, levels = 1:5, ordered = TRUE)
+  d$Age <- factor(d$Age, levels = 1:13, ordered = TRUE)
+  d$Education <- factor(d$Education, levels = 1:6, ordered = TRUE)
+  d$Income <- factor(d$Income, levels = 1:8, ordered = TRUE)
+  
+  # Fix lavaan warning: some ordered categorical variable(s) have more than 12 levels: "Age". 
+  # Fix by treating age as a continuous variable (assuming ranges are equally spaced)
+  d$Age <- factor(d$Age, 
+                  levels = c(1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13), 
+                  labels = c("18-34", "18-34", "18-34", "35-49", "35-49", "35-49", 
+                             "50-64", "50-64", "50-64", "65+", "65+", "65+", "65+"), 
+                  ordered = TRUE)
+  d$Age <- as.numeric(d$Age)
+  
+  #Scale Numeric Variables to std=1
+  d$Age <- scale(d$Age)
+  d$BMI <- scale(d$BMI)
+  d$MentHlth <- scale(d$MentHlth)
+  d$PhysHlth <- scale(d$PhysHlth)
+  
+  return(d)
+}
 
-# Load data
+
+# Load data with pre-processing
+data <- load_data()
+
+# Load data without pre-processing
 data <- read.csv("/Users/daankersten/Desktop/Study/Bayesian/BNCI/data/diabetes_binary_health_indicators_BRFSS2015.csv")
-subset_data <- head(data, 5000)
+
+# Can't train on the whole dataset (takes forever) --> so just take subset of 5000-10000 samples
+subset_data <- head(data, 7500)
 
 
 # White list; relations between items that MUST be in the final DAG (based of domain knowledge)
@@ -100,11 +135,9 @@ black_list <- data.frame(from = c(
   ))
 
 # Run PC algorithm
+# DAG from the PC algorithm without lists
 pc_model_without_lists <- pc.stable(subset_data, alpha = 0.01)
-pc_model_with_lists <- pc.stable(subset_data, black_list = black_list, white_list = white_list, alpha = 0.01)
-print(pc_model)
-
-# Visualize the DAG from the PC algorithm without lists
+print(pc_model_without_lists)
 graph <- graphviz.plot(pc_model_without_lists, layout = "dot")
 plot(graph)
 arcs <- arcs(pc_model_without_lists)
@@ -112,8 +145,12 @@ dagitty_format_without_lists <- paste("dag {",
                         paste0(arcs[, 1], " -> ", arcs[, 2], collapse = "; "),
                         "}")
 print(dagitty_format_without_lists)
+adj_matrix <- as(graph, "matrix")
+g <- graph_from_adjacency_matrix(adj_matrix, mode = "directed")
+is_acyclic(g)
 
-# Visualize the DAG from the PC algorithm with lists
+# DAG from the PC algorithm with lists
+pc_model_with_lists <- pc.stable(subset_data, black_list = black_list, white_list = white_list, alpha = 0.01)
 graph <- graphviz.plot(pc_model_with_lists, layout = "dot")
 plot(graph)
 arcs <- arcs(pc_model_with_lists)
@@ -121,7 +158,9 @@ dagitty_format_with_lists <- paste("dag {",
                                       paste0(arcs[, 1], " -> ", arcs[, 2], collapse = "; "),
                                       "}")
 print(dagitty_format_with_lists)
-
+adj_matrix <- as(graph, "matrix")
+g <- graph_from_adjacency_matrix(adj_matrix, mode = "directed")
+is_acyclic(g)
 
 
 
