@@ -1,0 +1,83 @@
+dag {
+bb="-9.145,-7.211,8.532,7.668"
+Age [pos="-4.012,-6.480"]
+AnyHealthcare [pos="3.647,0.154"]
+BMI [pos="-1.539,2.944"]
+CholCheck [pos="-0.010,2.105"]
+Diabetes_binary [outcome,pos="-3.557,6.587"]
+DiffWalk [pos="5.189,3.493"]
+Education [pos="2.009,-6.457"]
+Fruits [pos="-1.667,-4.834"]
+GenHlth [pos="-1.053,6.504"]
+HeartDiseaseorAttack [pos="-5.814,6.554"]
+HighBP [pos="-5.299,0.153"]
+HighChol [pos="-1.965,-0.775"]
+HvyAlcoholConsump [pos="-7.549,3.994"]
+Income [pos="3.509,-3.894"]
+MentHlth [pos="2.442,4.215"]
+NoDocbcCost [pos="5.892,-2.190"]
+PhysActivity [pos="1.603,3.085"]
+PhysHlth [pos="2.044,6.467"]
+Sex [pos="-7.098,-6.005"]
+Smoker [pos="-8.190,-1.076"]
+Stroke [pos="-7.874,6.604"]
+Veggies [pos="0.056,-3.743"]
+Age -> Diabetes_binary
+Age -> DiffWalk
+Age -> GenHlth
+Age -> HighBP
+Age -> HighChol
+Age -> Income
+AnyHealthcare -> CholCheck
+AnyHealthcare -> GenHlth [pos="2.932,3.046"]
+AnyHealthcare -> MentHlth
+BMI -> Diabetes_binary [pos="-2.512,3.968"]
+BMI -> HighBP [pos="-4.455,0.953"]
+BMI -> HighChol [pos="-1.735,0.663"]
+Diabetes_binary -> HeartDiseaseorAttack
+DiffWalk -> MentHlth
+DiffWalk -> PhysHlth
+DiffWalk <-> PhysActivity
+Education -> BMI
+Education -> Fruits
+Education -> Income
+Education -> PhysActivity [pos="1.174,0.410"]
+Education -> Smoker [pos="-4.498,-5.251"]
+Education -> Veggies
+Fruits -> BMI [pos="-1.300,-1.691"]
+Fruits -> HighBP
+Fruits <-> Veggies
+GenHlth -> Diabetes_binary
+HeartDiseaseorAttack -> Stroke
+HighBP -> Diabetes_binary [pos="-4.656,0.436"]
+HighBP -> HeartDiseaseorAttack
+HighChol -> CholCheck
+HighChol -> Diabetes_binary
+HighChol -> HeartDiseaseorAttack
+HighChol -> Stroke
+HvyAlcoholConsump -> HeartDiseaseorAttack
+HvyAlcoholConsump -> Stroke
+Income -> AnyHealthcare
+Income -> BMI [pos="1.454,-1.505"]
+Income -> DiffWalk
+Income -> NoDocbcCost
+Income -> PhysActivity
+MentHlth -> GenHlth
+MentHlth <-> PhysHlth [pos="2.316,5.082"]
+NoDocbcCost -> AnyHealthcare
+NoDocbcCost -> PhysHlth [pos="5.460,0.470"]
+PhysActivity -> BMI [pos="-0.663,3.200"]
+PhysActivity -> Diabetes_binary
+PhysActivity -> GenHlth
+PhysActivity -> PhysHlth [pos="1.804,4.687"]
+PhysHlth -> GenHlth
+Sex -> BMI
+Sex -> HeartDiseaseorAttack
+Sex -> HighBP
+Sex -> HighChol
+Smoker -> GenHlth [pos="-4.063,3.551"]
+Smoker -> HeartDiseaseorAttack
+Smoker -> HighBP
+Smoker -> Stroke
+Veggies -> HighBP
+}

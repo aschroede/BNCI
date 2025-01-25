@@ -90,6 +90,7 @@ get_causal_effects <- function(doDAG_path, target_var){
     implied_cov_matrix = impliedCovarianceMatrix(doDAG, standardized = TRUE)
     implied_cov = implied_cov_matrix[variable, target_var]
     causal_effects[[variable]] <- implied_cov
+    implied
   }
   
   return (causal_effects)
@@ -125,7 +126,7 @@ load_data <- function(){
 
 # Runs conditional independence tests on a dag and saves the result. 
 # Useful for testing for independence statements that don't hold.
-run_independence_tests <- function(dag, data, max_conditioning_vars, top_n = Inf, folder){
+run_independence_tests <- function(dag, data, max_conditioning_vars, top_n = Inf, folder, size = 300){
   
   # Generate the polychoric correlation matrix
   polychoric_matrix <- lavCor(data)
@@ -139,8 +140,8 @@ run_independence_tests <- function(dag, data, max_conditioning_vars, top_n = Inf
   write.csv(polychoric_tests, file.path(folder, "poly_cor_indep_tests.csv"))
   
   # Save image
-  png(file=file.path(folder, "plot_results.png"), width=900, height=900)
-  plotLocalTestResults(polychoric_tests, n = top_n)
+  png(file=file.path(folder, "plot_results.png"), width=size, height=size)
+  plotLocalTestResults(polychoric_tests, n = 10) # Increase axis label size
   dev.off()
 }
 
@@ -198,6 +199,8 @@ Age -> Income
 AnyHealthcare -> CholCheck
 AnyHealthcare -> GenHlth
 AnyHealthcare -> MentHlth
+AnyHealthcare -> PhysActivity
+AnyHealthcare -> PhysHlth
 BMI -> Diabetes_binary [pos="-2.512,3.968"]
 BMI -> HighBP [pos="-4.052,-0.880"]
 BMI -> HighChol [pos="-1.086,-2.072"]
@@ -206,6 +209,7 @@ DiffWalk -> MentHlth
 DiffWalk -> PhysHlth
 DiffWalk <-> PhysActivity
 Education -> BMI
+Education -> CholCheck
 Education -> Fruits
 Education -> Income
 Education -> PhysActivity [pos="1.174,0.410"]
@@ -219,7 +223,8 @@ HeartDiseaseorAttack -> Stroke
 HighBP -> Diabetes_binary [pos="-4.656,0.436"]
 HighBP -> HeartDiseaseorAttack
 HighChol -> CholCheck
-HighChol -> Diabetes_binary
+HighChol -> Diabetes_binary# Save fitted dag with path coefficients
+save_to_txt(fg, "FittedDAG.txt")
 HighChol -> HeartDiseaseorAttack
 HighChol -> Stroke
 HvyAlcoholConsump -> HeartDiseaseorAttack
@@ -242,12 +247,15 @@ Sex -> BMI
 Sex -> HeartDiseaseorAttack
 Sex -> HighBP
 Sex -> HighChol
+Smoker -> Diabetes_binary
 Smoker -> GenHlth [pos="-2.647,2.976"]
 Smoker -> HeartDiseaseorAttack
 Smoker -> HighBP
 Smoker -> Stroke
+Veggies -> BMI
 Veggies -> HighBP
-}')
+}
+')
   return(g)
 }
 

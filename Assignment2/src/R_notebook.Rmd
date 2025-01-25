@@ -1,0 +1,98 @@
+---
+title: "Bayesian Networks Assignment 2"
+output: html_notebook
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+source("utilities.R")
+```
+
+## Step 1: Load DAG with Coefficients
+
+```{r}
+# Bring in the utilities file to access all functions
+d <- load_data()
+g <- get_dag()
+test_for_cycles(g)
+
+
+# Extract polychoric correlation matrix using lavaan
+M <- lavCor(d)
+
+# Use the data, polychoric correlation matrix, and the dag to fit our model
+fit <- sem(toString(g, "lavaan"), sample.cov=M, sample.nobs=nrow(d))
+```
+
+```{r}
+# Convert the fitted sem model in lavaan to a daggity dag
+fg <- lavaanToGraph(fit, digits=2)
+
+# Save fitted dag with path coefficients
+save_to_txt(fg, "FittedDAG.txt")
+
+# Extract coordinates from daggity dag
+cg <- coordinates(g)
+# Apply coordinates to fitted daggity dag
+coordinates(fg) <-cg
+# Draw resutling daggity dag wtih coefficients
+plot(fg, show.coefficients=TRUE)
+```
+
+## Step 2: Determine Adjustment Set
+
+Focal relationship is between HighBP and Diabetes. Need to determine the Adjustment Set.
+
+```{r}
+adjustmentSets(fg, "HighBP", "Diabetes_binary")
+```
+
+Here we have lots of adjustment sets, maybe we just pick the smallest one for simplicity (the first one).
+
+## Step 3: Do Logistic Regression on Unadjusted and Adjusted Hand Crafted Network
+
+Unadjusted:
+
+```{r}
+coef(glm(Diabetes_binary ~ HighBP, d, family="binomial"))
+```
+
+Adjusted:
+
+```{r}
+coef(glm(Diabetes_binary ~ HighBP + Age + BMI + GenHlth + HighChol + PhysActivity + Smoker, d, family="binomial"))
+```
+
+For unadjusted we see a larger effect of 1.62 and for adjusted we see a lower effect of 0.79.
+
+Need to generate confidence intervals or something like this. Also test with different adjustment sets.
+
+## Step 4: Do Logistic Regression on Unadjusted and Adjusted PC Network
+
+Load PC DAG
+
+```{r}
+pcg <- get_pc_dag()
+test_for_cycles(pcg)
+```
+
+Get adjustment set for PC DAG
+
+```{r}
+adjustmentSets(pcg, "HighBP", "Diabetes_binary")
+```
+
+Unadjusted:
+
+```{r}
+coef(glm(Diabetes_binary ~ HighBP, d, family="binomial"))
+```
+
+Adjusted:
+
+```{r}
+coef(glm(Diabetes_binary ~ HighBP + Age + BMI + GenHlth + HighChol + PhysActivity + Smoker, d, family="binomial"))
+```

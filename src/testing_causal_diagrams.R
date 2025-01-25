@@ -7,7 +7,7 @@ test_for_cycles(g)
 visualise_data()
 
 # Test for too few edges
-run_independence_tests(g, d, 1, 20, "Test6")
+run_independence_tests(g, d, 1, 10, "Test5", 600)
 
 # Test for too many edges
 get_superfluous_edges()
