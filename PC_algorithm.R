@@ -21,7 +21,7 @@ library(igraph)
 
 load_data <- function(){
   # Load data
-  d <- read.csv("/Users/daankersten/Desktop/Study/Bayesian/BNCI/data/diabetes_binary_health_indicators_BRFSS2015.csv")
+  d <- read.csv("data/diabetes_binary_health_indicators_BRFSS2015.csv")
   
   
   # Ordinal Variables
@@ -53,7 +53,7 @@ load_data <- function(){
 data <- load_data()
 
 # Load data without pre-processing
-data <- read.csv("/Users/daankersten/Desktop/Study/Bayesian/BNCI/data/diabetes_binary_health_indicators_BRFSS2015.csv")
+data <- read.csv("data/diabetes_binary_health_indicators_BRFSS2015.csv")
 
 # Can't train on the whole dataset (takes forever) --> so just take subset of 5000-10000 samples
 subset_data <- head(data, 7500)

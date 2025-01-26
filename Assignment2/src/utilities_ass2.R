@@ -98,6 +98,7 @@ get_causal_effects <- function(doDAG_path, target_var) {
 load_data <- function() {
   # Load data
   d <- read.csv("diabetes_binary_health_indicators_BRFSS2015.csv")
+  #d <- read.csv("../../data/SUBSET_diabetes_binary_health_indicators_BRFSS2015.csv")
 
 
   # Ordinal Variables
@@ -212,7 +213,7 @@ Education -> Veggies
 Fruits -> BMI
 Fruits -> HighBP
 Fruits <-> Veggies
-GenHlth -> Diabetes_binaryget_pc_dag
+GenHlth -> Diabetes_binary
 HeartDiseaseorAttack -> Stroke
 HighBP -> Diabetes_binary [pos="-4.656,0.436"]
 HighBP -> HeartDiseaseorAttack
@@ -247,7 +248,8 @@ Smoker -> HighBP
 Smoker -> Stroke
 Veggies -> BMI
 Veggies -> HighBP
-}'
+}
+'
 )
   return(g)
 }
@@ -353,7 +355,7 @@ get_pc_dag <- function() {
 
 
 visualise_data <- function() {
-  d <- read.csv("diabetes_binary_health_indicators_BRFSS2015.csv")
+  d <- read.csv("data/diabetes_binary_health_indicators_BRFSS2015.csv")
 
 
   update_geom_defaults("bar", list(fill = "skyblue", color = NA))

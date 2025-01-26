@@ -16,7 +16,7 @@ library(cobalt)
 library(dagitty)
 
 
-source("C:/Users/svenm/Documents/Radboud/Bayesian Networks/BNCI/src/utilities.R")
+source("src/utilities.R")
 
 data <- load_data()
 cls <- c("Diabetes_binary", "HighChol", "CholCheck", "BMI", "Smoker", "Stroke", "HeartDiseaseorAttack", "PhysActivity", "Fruits", "Veggies", "HvyAlcoholConsump", "AnyHealthcare", "NoDocbcCost", "GenHlth", "MentHlth", "PhysHlth", "DiffWalk", "Sex", "Age", "Education", "Income")

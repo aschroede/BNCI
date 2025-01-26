@@ -1,15 +1,334 @@
+# Setup
+
 ---
 title: "Bayesian Networks Assignment 2"
 output: html_notebook
 ---
 
-```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
+Utility File
+
+```{r}
+source("utilities_ass2.R")
+```
+
+Packages
+
+```{r}
+# Install bnlearn
+if (!require(bnlearn)){
+  install.packages("bnlearn")
+}
+
+if (!require(pcalg)){
+  install.packages("pcalg")
+}
+
+if (!require(MatchIt)){
+  install.packages("MatchIt")
+}
+
+if (!require(stddiff)){
+  install.packages("stddiff")
+}
+
+if (!require(forestplot)){
+  install.packages("forestplot")
+}
+
+library(forestplot)
+library(stddiff)
+library(MatchIt)
+library(pcalg)
+library(igraph)
+#library(bnlearn)
+```
+
+Load and preprocess data
+
+```{r}
+
+# Load data
+d <- read.csv("diabetes_binary_health_indicators_BRFSS2015.csv")
+
+
+# Ordinal Variables
+d$GenHlth <- factor(d$GenHlth, levels = 1:5, ordered = TRUE)
+#d$Age <- factor(d$Age, levels = 1:13, ordered = TRUE)
+d$Education <- factor(d$Education, levels = 1:6, ordered = TRUE)
+d$Income <- factor(d$Income, levels = 1:8, ordered = TRUE)
+d$Age <- as.numeric(d$Age)
+
+# Convert numeric variables to ordinal because PC algorithm needs all discrete
+# data for using the disCItest.
+d$BMI <- cut(d$BMI, breaks=4, labels = FALSE)
+d$MentHlth <- cut(d$MentHlth, breaks=4, labels = FALSE)
+d$PhysHlth <- cut(d$PhysHlth, breaks=4, labels = FALSE)
+d$Age <- cut(d$Age, breaks=4, labels = FALSE)
+
+
+# Preprocess the data to make it all numeric
+preprocess_data <- function(d) {
+  d_processed <- d
+  
+  # Convert all ordinal factors to numeric (integer levels)
+  for (col in names(d_processed)) {
+    if (is.ordered(d_processed[[col]])) {
+      d_processed[[col]] <- as.numeric(d_processed[[col]])
+    }
+  }
+  
+  # Ensure all numeric columns are integers (for discrete tests)
+  for (col in names(d_processed)) {
+    if (is.numeric(d_processed[[col]]) || is.integer(d_processed[[col]])) {
+      d_processed[[col]] <- as.integer(d_processed[[col]])
+    }
+  }
+  
+  return(d_processed)
+}
+
+# Apply preprocessing
+d_processed <- preprocess_data(d)
+
+# Verify the structure of the processed data
+str(d_processed)
+
 ```
 
 ```{r}
-source("utilities.R")
+integer_cols <- sapply(d_processed, is.integer)
+for (col in names(d_processed)[integer_cols]) {
+  d_processed[[col]] <- as.factor(d_processed[[col]])
+}
+str(d_processed)
+
+
+ci.test("Age", "DiffWalk", "BMI", data = d_processed, test="x2")
 ```
+
+# Part 1: PC Algorithm
+
+Run pc algorithm
+
+```{r}
+
+var_names <- colnames(d_processed)  # Get variable names from your dataset
+p <- length(var_names)
+
+fixedEdges <- matrix(FALSE, nrow = p, ncol = p, dimnames = list(var_names, var_names))
+fixedEdges["HighBP", "Diabetes_binary"] <- TRUE
+fixedEdges["Diabetes_binary", "HighBP"] <- TRUE  # Symmetric
+
+
+# Sample a subset to speed up algorithm
+d_sampled <- d_processed[sample(1:nrow(d_processed), size = 10000), ]
+
+suffStat <-list(dm = as.matrix(d_sampled), nlev = apply(d_sampled, 2, function(x) length(unique(x))), adaptDF = FALSE)
+
+fit <- pc(suffStat =  suffStat,
+          indepTest = disCItest,
+          # 0.05 good
+          # 0.0001 also good?
+          alpha = 0.1,
+          labels = colnames(d),
+          m.max = 2,
+          skel.method = "stable.fast",
+          numCores = 16,
+          fixedEdges = fixedEdges,
+          u2pd = "retry",
+          verbose = TRUE)
+```
+
+```{r}
+is_valid <- isValidGraph(as(fit, "amat"), type = "cpdag")
+print(is_valid)
+```
+
+Plot
+
+```{r}
+# Load the necessary libraries
+library(pcalg)
+library(dagitty)
+
+# Assuming you already have a pcAlgo object named `pc_result`
+# Extract adjacency matrix
+adj_matrix <- as(fit@graph, "matrix")
+
+# Extract node names from the pcAlgo object
+node_names <- colnames(adj_matrix)  # Get node names from the adjacency matrix
+
+# Convert adjacency matrix to an edge list with actual node names
+edge_list <- which(adj_matrix == 1, arr.ind = TRUE)
+edges <- apply(edge_list, 1, function(x) {
+  paste0(node_names[x[1]], " -> ", node_names[x[2]])  # Use node names
+})
+
+# Create a DAGitty graph
+dag <- dagitty(paste("dag {", paste(edges, collapse = "; "), "}"))
+
+# Print the DAGitty object
+print(dag)
+
+# Plot the DAG
+plot(dag)
+
+
+```
+
+```{r}
+library(Rgraphviz)
+adj_matrix <- as(fit, "matrix")
+graph <- as(adj_matrix, "graphNEL")
+nodeRenderInfo(graph)$fontsize <- 20
+#if (require(Rgraphviz)) {
+   ## show estimated CPDAG
+plot(fit, "twopi", main = "Estimated CPDAG")
+
+#}
+
+#iplotPC(fit)
+
+
+```
+
+Check for cycles
+
+```{r}
+is_valid <- isValidGraph(as(fit, "amat"), type = "cpdag")
+print(is_valid)
+```
+
+# Part 2: Propensity Score Matching
+
+## Find Imbalances
+
+```{r}
+data <- load_data()
+# Treat HighBP as a grouping varible ("Yes/No")
+# data$HighBP <- as.factor(data$HighBP)
+
+# Sample subset to avoid integer overflow in stddiff
+data <- data[sample(1:nrow(data), size = 75000), ]
+```
+
+```{r}
+summary(lm(Diabetes_binary ~ HighBP, data))
+confint(lm(Diabetes_binary ~ HighBP, data))
+```
+
+We can see that HighBP has an effect of 0.184 in the naive analysis. Now lets use a t.test to test for imbalance
+
+```{r}
+t.test(Diabetes_binary ~ HighBP, data)
+```
+
+There is a statistical difference in means between group 0 and group 1 (0.06 vs 0.24). Sample a smaller subset of data to avoid integer overlows
+
+```{r}
+
+cls <- colnames(data)
+cls <- cls[cls != "HighBP"]
+base_imb <- as.data.frame(stddiff.numeric(data, vcol=cls, gcol="HighBP"))
+
+forestplot(
+  labeltext = cls,
+  mean=base_imb$stddiff,
+  lower=base_imb$stddiff.l,
+  upper=base_imb$stddiff.u
+)
+
+```
+
+## Compute Propensity Scores
+
+Lets fix the imbalance using propensity scores. Fit logistic regression model of the treatment on the covariates. First lets find the covariates using the backdoor criterion to get the adjustment set from Daggity. These are the minimum adjustment sets:
+
+-   Age, BMI, Fruits, Sex, Smoker, Veggies
+
+-   Age, BMI, HighChol, PhysActivity, Smoker
+
+-   **Age, BMI, PhysActivity, Sex, Smoker**
+
+Lets choose the last one to work with.
+
+```{r}
+# + GenHlth + HighChol
+mdl <- glm(HighBP ~ Age + BMI + PhysActivity + Sex + Smoker, data = data, family="binomial")
+summary(mdl)
+```
+
+Now get propensity scores (probability of receiving the treatement given the covariates) by transforming the log odds ratios predicted by the logtistic regression model to probabilities.
+
+```{r}
+pscore_logit <- predict( mdl )
+pscore <- exp(pscore_logit) / (1+exp(pscore_logit))
+
+boxplot(pscore ~ data$HighBP)
+```
+
+Lets estimate treatement effect now with inverse probability weighting
+
+```{r}
+wgt <- 1/pscore
+wgt[!data$HighBP] <- 1/(1-pscore[!data$HighBP])
+summary( lm( Diabetes_binary ~ HighBP, data, weights=pscore ) )
+```
+
+Not a big difference with the adjustment compared to before with the naive regression where we had 0.184561 compared to the new value of 0.189850.
+
+Now lets match on propensity scores. For each treated individual, we attempt to find a matching control with a propensity score that differs by at most 5%.
+
+```{r}
+mm <- matchit(data$HighBP ~ pscore, caliper=0.1)$match.matrix
+
+```
+
+See how many matched rows out of 75k were matched
+
+```{r}
+nrow(mm)
+
+```
+
+We failed to find controls for some treatments, so we need to remove them.
+
+```{r}
+mm <- mm[!is.na(mm),,drop=FALSE]
+trt <- as.integer(rownames(mm))
+ctrl <- as.integer(mm[,1])
+dmtch <- data[c(trt,ctrl),]
+nrow(mm)
+```
+
+After filtering out unmatched items we have \~24k matched data points. Now lets check the covariate balance in our new dataset that contains only matched samples.
+
+```{r}
+match_imb <-as.data.frame(stddiff.numeric(dmtch, vcol=cls, gcol="HighBP"))
+forestplot(
+  labeltext = cls,
+  mean=match_imb$stddiff,
+  lower=match_imb$stddiff.l,
+  upper=match_imb$stddiff.u )
+```
+
+Hmm this doesn't seem to have worked as well as one would hope...
+
+Now run regression again on matched data
+
+```{r}
+summary(lm(Diabetes_binary ~ HighBP, dmtch))
+```
+
+We see a coefficient of 0.131537 compared to 0.184561, so it appears the effect size is actually smaller when we balance the covariates.
+
+Run t-test again
+
+```{r}
+t.test(Diabetes_binary ~ HighBP, dmtch)
+```
+
+# Part 3: Covariate Adjustment
 
 ## Step 1: Load DAG with Coefficients
 
@@ -25,6 +344,10 @@ M <- lavCor(d)
 
 # Use the data, polychoric correlation matrix, and the dag to fit our model
 fit <- sem(toString(g, "lavaan"), sample.cov=M, sample.nobs=nrow(d))
+```
+
+```{r}
+colnames
 ```
 
 ```{r}
@@ -58,12 +381,16 @@ Unadjusted:
 
 ```{r}
 coef(glm(Diabetes_binary ~ HighBP, d, family="binomial"))
+confint(glm(Diabetes_binary ~ HighBP, d, family="binomial"))
 ```
 
 Adjusted:
 
 ```{r}
-coef(glm(Diabetes_binary ~ HighBP + Age + BMI + GenHlth + HighChol + PhysActivity + Smoker, d, family="binomial"))
+m<-glm(Diabetes_binary ~ HighBP + Age + BMI + GenHlth + HighChol + PhysActivity + Smoker, d, family="binomial")
+coef(m)[1:2]
+
+confint(glm(Diabetes_binary ~ HighBP + Age + BMI + GenHlth + HighChol + PhysActivity + Smoker, d, family="binomial"))
 ```
 
 For unadjusted we see a larger effect of 1.62 and for adjusted we see a lower effect of 0.79.
